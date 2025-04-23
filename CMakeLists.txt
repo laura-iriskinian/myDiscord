@@ -22,6 +22,8 @@ link_directories(
     ${PostgreSQL_LIBRARY_DIRS}
 )
 
+configure_file(${CMAKE_SOURCE_DIR}/src/log_style.css ${CMAKE_BINARY_DIR}/log_style.css COPYONLY)
+
 # Ajouter les fichiers sources
 add_executable(MyDiscord
     src/main.c
@@ -41,4 +43,3 @@ target_link_libraries(MyDiscord
 # Ajouter les définitions GTK4
 add_definitions(${GTK4_CFLAGS_OTHER})
 
-configure_file(${CMAKE_SOURCE_DIR}/src/log_style.css ${CMAKE_BINARY_DIR}/log_style.css COPYONLY)
