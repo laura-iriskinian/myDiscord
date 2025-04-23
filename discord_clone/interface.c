@@ -444,21 +444,34 @@ static void activate(GtkApplication *app, gpointer user_data) {
         gtk_box_append(GTK_BOX(conversations_panel), conv_label);
     }
 
-    // Zone de chat (grande)
     GtkWidget *chat_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_add_css_class(chat_panel, "chat");
     gtk_widget_set_hexpand(chat_panel, TRUE);
     gtk_widget_set_vexpand(chat_panel, TRUE);
-
+    
+    // Zone de texte avec messages
     GtkWidget *chat_area = gtk_text_view_new();
     gtk_widget_set_vexpand(chat_area, TRUE);
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(chat_area), FALSE);
+    gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(chat_area), FALSE);
     gtk_widget_add_css_class(chat_area, "chat-area");
-
+    
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(chat_area));
+    gtk_text_buffer_set_text(buffer,
+        "Louis: Salut, let's go créer un chat discord like !\n"
+        "Nuage : Cest pas évident du  tout ! good luck \n"
+        "Louis: Merci ! Il nous en faudra du courage ! \n",
+        -1
+    );
+    
+    // Champ de saisie
     GtkWidget *entry = gtk_entry_new();
     gtk_widget_add_css_class(entry, "chat-entry");
-
+    
+    // Ajout au panneau
     gtk_box_append(GTK_BOX(chat_panel), chat_area);
     gtk_box_append(GTK_BOX(chat_panel), entry);
+    
 
     // Colonne profil (étroite)
     GtkWidget *profile_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
