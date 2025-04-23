@@ -1,0 +1,27 @@
+/* Style sheet for the sign-in page */
+window {
+    background-color: #1E1F20;
+}
+
+/* Entry field */
+.my-entry {
+    background-color: #1E1F20;
+    color: white;
+    border-radius: 6px;
+    padding: 8px;
+}
+
+.my-button {
+    background: #2EC4B6;
+    color: black;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 10px;
+    border: none;
+    box-shadow: none;
+}
+
+.my-button:hover {
+    background: #6622CC;
+    color: white;
+}
