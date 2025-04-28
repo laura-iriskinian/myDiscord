@@ -1,9 +1,9 @@
-/* Style sheet for the sign-in page */
+/* Style sheet for the project */
 window {
     background-color: #1E1F20;
 }
 
-/* Entry field */
+/* Entry field on connection pages*/
 .my-entry {
     background-color: #1E1F20;
     color: white;
