@@ -8,25 +8,27 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED gtk4)
 pkg_check_modules(LIBPQ REQUIRED libpq)
 
+
 # Define inclusion directories
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/client)
 # include_directories(${CMAKE_SOURCE_DIR}/server)
 
 # Server executables
-# add_executable(myDiscord_server
-#     server/main.c
-#     server/server.c
-#     server/channel.c 
-#     server/crypto.c 
-#     server/database.c 
-#     server/message.c 
-#     server/user.c
-# )
+add_executable(myDiscord_server
+    server/server_main.c
+    server/server.c
+    server/channel.c 
+    server/crypto.c 
+    server/database.c 
+    server/message.c 
+    server/user.c
+    server/load_env.c
+)
 
 # Configure server
-# target_include_directories(myDiscord_server PRIVATE ${LIBPQ_INCLUDE_DIRS})
-# target_link_libraries(myDiscord_server PRIVATE ${LIBPQ_LIBRARIES} pthread)
+target_include_directories(myDiscord_server PRIVATE ${LIBPQ_INCLUDE_DIRS})
+target_link_libraries(myDiscord_server PRIVATE ${LIBPQ_LIBRARIES} pthread)
 
 # Client executables
 add_executable(myDiscord_client

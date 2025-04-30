@@ -11,6 +11,9 @@
 // Variables
 int server_socket;
 pthread_t recv_thread;  
+static char server_response[1024];
+static bool auth_response_received_flag = false;
+static bool auth_success = false;
 
 // Connection to server
 bool init_connection(void) {
@@ -54,6 +57,12 @@ bool receive_from_server(char* buffer, int size) {
 
 // Function called in interface.c
 void send_message_to_server(const char *message) {
+    // Reset auth flag when sending new login command
+    if (strstr(message, "/login") != NULL) {
+        auth_response_received_flag = false;
+        auth_success = false;
+    }
+    
     if (!send_to_server(message)) {
         fprintf(stderr, "Erreur lors de l'envoi du message au serveur.\n");
     }
@@ -65,10 +74,18 @@ void* receive_thread(void* arg) {
 
     while (1) {
         if (!receive_from_server(buffer, sizeof(buffer))) {
-            printf("Déconnexion du serveur.\n");
+            printf("Disconnection from server.\n");
             break;
         }
-        printf("Message reçu: %s\n", buffer);
+        
+        printf("Message received: %s\n", buffer);
+        
+        // Traiter les réponses d'authentification
+        if (strstr(buffer, "Authentification successfull") != NULL || 
+            strstr(buffer, "Error: Incorrect") != NULL ||
+            strstr(buffer, "has connected") != NULL) {
+            handle_auth_response(buffer);
+        }
     }
 
     close_connection();
@@ -81,4 +98,45 @@ void start_receive_thread(void) {
         perror("pthread_create");
         exit(EXIT_FAILURE);
     }
+}
+
+// Function to handle authentication responses
+void handle_auth_response(const char *message) {
+    strncpy(server_response, message, sizeof(server_response) - 1);
+    server_response[sizeof(server_response) - 1] = '\0';
+    printf("DEBUG: Processing auth response: %s\n", message);
+    
+    // Check if one of the messages is an authentication confirmation
+    if (strstr(message, "successfull") != NULL) {
+        auth_success = true;
+        printf("DEBUG: Authentication success detected\n");
+    } 
+    // If an error message is detected, authentication failed
+    else if (strstr(message, "Error:") != NULL || strstr(message, "Incorrect") != NULL) {
+        auth_success = false;
+        printf("DEBUG: Authentication failure detected\n");
+    }
+    // If the message indicates successful connection
+    else if (strstr(message, "has connected") != NULL) {
+        auth_success = true;
+        printf("DEBUG: Connection message detected, assuming success\n");
+    }
+    
+    auth_response_received_flag = true;
+}
+
+// Function to check if auth response was received
+bool auth_response_received(void) {
+    return auth_response_received_flag;
+}
+
+// Function to get authentication state
+bool get_auth_status(char *response_message, size_t size) {
+    // Copy message if response requested
+    if (response_message != NULL && size > 0) {
+        strncpy(response_message, server_response, size - 1);
+        response_message[size - 1] = '\0';
+    }
+    
+    return auth_success;
 }

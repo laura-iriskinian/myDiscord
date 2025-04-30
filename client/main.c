@@ -7,6 +7,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
 }
 
 int main(int argc, char* argv[]) {
+    // store temp files in a separate tmp folder
+    setenv("XDG_RUNTIME_DIR", "/tmp", 1);
+    // initialize GTK
     GtkApplication *app;
     int status;
 
