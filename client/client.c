@@ -7,13 +7,15 @@
 #include <sys/socket.h>
 #include <pthread.h>   
 #include "client.h"
+#include "interface.h"
 
 // Variables
-int server_socket;
+int server_socket = -1;
 pthread_t recv_thread;  
 static char server_response[1024];
-static bool auth_response_received_flag = false;
+static bool auth_response_flag = false;
 static bool auth_success = false;
+static bool connection_active = false;
 
 // Connection to server
 bool init_connection(void) {
@@ -21,7 +23,7 @@ bool init_connection(void) {
 
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket < 0) {
-        perror("Socket");
+        perror("Socket creation failed");
         return false;
     }
 
@@ -30,39 +32,53 @@ bool init_connection(void) {
     server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
     if (connect(server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-        perror("Connect");
+        perror("Connection to server failed");
+        close(server_socket);
+        server_socket = -1;
         return false;
     }
 
+    connection_active = true;
     return true;
 }
 
 // Close connection to server
 void close_connection(void) {
-    close(server_socket);
+    if (server_socket >= 0) {
+        close(server_socket);
+        server_socket = -1;
+    }
+    connection_active = false;
 }
 
 // Send a message to server
 bool send_to_server(const char* message) {
+    if (server_socket < 0 || !connection_active) {
+        fprintf(stderr, "Impossible d'envoyer un message: pas de connexion active au serveur.\n");
+        return false;
+    }
+    
     return send(server_socket, message, strlen(message), 0) > 0;
 }
 
 // Receive a message from server 
 bool receive_from_server(char* buffer, int size) {
+    if (server_socket < 0 || !connection_active) {
+        return false;
+    }
+    
     int len = recv(server_socket, buffer, size - 1, 0);
-    if (len <= 0) return false;
+    if (len <= 0) {
+        connection_active = false;
+        return false;
+    }
+    
     buffer[len] = '\0';
     return true;
 }
 
 // Function called in interface.c
 void send_message_to_server(const char *message) {
-    // Reset auth flag when sending new login command
-    if (strstr(message, "/login") != NULL) {
-        auth_response_received_flag = false;
-        auth_success = false;
-    }
-    
     if (!send_to_server(message)) {
         fprintf(stderr, "Erreur lors de l'envoi du message au serveur.\n");
     }
@@ -72,7 +88,7 @@ void send_message_to_server(const char *message) {
 void* receive_thread(void* arg) {
     char buffer[1024];
 
-    while (1) {
+    while (connection_active) {
         if (!receive_from_server(buffer, sizeof(buffer))) {
             printf("Disconnection from server.\n");
             break;
@@ -80,23 +96,28 @@ void* receive_thread(void* arg) {
         
         printf("Message received: %s\n", buffer);
         
-        // Traiter les réponses d'authentification
-        if (strstr(buffer, "Authentification successfull") != NULL || 
-            strstr(buffer, "Error: Incorrect") != NULL ||
-            strstr(buffer, "has connected") != NULL) {
+        // Process authentication responses
+        if (strstr(buffer, "Authentication") != NULL || 
+            strstr(buffer, "successfull") != NULL ||
+            strstr(buffer, "Authentification") != NULL ||
+            strstr(buffer, "Error:") != NULL || 
+            strstr(buffer, "Incorrect") != NULL) {
             handle_auth_response(buffer);
         }
+        
+        // Process other messages (like chat messages)
+        process_incoming_message(buffer);
     }
 
-    close_connection();
+    connection_active = false;
     return NULL;
 }
 
 // Start reception thread 
 void start_receive_thread(void) {
     if (pthread_create(&recv_thread, NULL, receive_thread, NULL) != 0) {
-        perror("pthread_create");
-        exit(EXIT_FAILURE);
+        perror("Failed to create receive thread");
+        connection_active = false;
     }
 }
 
@@ -122,21 +143,27 @@ void handle_auth_response(const char *message) {
         printf("DEBUG: Connection message detected, assuming success\n");
     }
     
-    auth_response_received_flag = true;
-}
-
-// Function to check if auth response was received
-bool auth_response_received(void) {
-    return auth_response_received_flag;
+    auth_response_flag = true;
 }
 
 // Function to get authentication state
 bool get_auth_status(char *response_message, size_t size) {
+    // If the response has not been received yet, return false
+    if (!auth_response_flag) {
+        return false;
+    }
+    
     // Copy message if response requested
     if (response_message != NULL && size > 0) {
         strncpy(response_message, server_response, size - 1);
         response_message[size - 1] = '\0';
     }
     
-    return auth_success;
+    // Save state before clearing for next auth
+    bool success = auth_success;
+    
+    // Reset for next authentication
+    auth_response_flag = false;
+    
+    return success;
 }

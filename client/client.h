@@ -19,7 +19,6 @@ void send_message_to_server(const char *message);
 
 // Functions to verify authentication
 void handle_auth_response(const char *message);
-bool auth_response_received(void);
 bool get_auth_status(char *response_message, size_t size);
 
 #endif

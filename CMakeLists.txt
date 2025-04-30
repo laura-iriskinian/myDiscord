@@ -8,11 +8,10 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED gtk4)
 pkg_check_modules(LIBPQ REQUIRED libpq)
 
-
 # Define inclusion directories
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/client)
-# include_directories(${CMAKE_SOURCE_DIR}/server)
+include_directories(${CMAKE_SOURCE_DIR}/server)  # Ajout du répertoire server pour les inclusions
 
 # Server executables
 add_executable(myDiscord_server
@@ -40,7 +39,8 @@ add_executable(myDiscord_client
 # Configuration of GTK4 for the client
 target_include_directories(myDiscord_client PRIVATE 
     ${GTK4_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/client  # to find local headers
+    ${CMAKE_SOURCE_DIR}/client    # pour trouver les en-têtes locaux
+    ${CMAKE_SOURCE_DIR}/server    # Ajout du répertoire server pour les inclusions
 )
 target_link_libraries(myDiscord_client PRIVATE ${GTK4_LIBRARIES})
 target_compile_options(myDiscord_client PRIVATE ${GTK4_CFLAGS_OTHER})

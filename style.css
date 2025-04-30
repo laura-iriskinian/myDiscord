@@ -1,111 +1,178 @@
-window {
-    background-color: #1c1e26;
-    color: #e0e0e0;
-    font-family: "Segoe UI", sans-serif;
-    padding: 0;
-    border: 2px solid #8b5cf6; /* Bordure violette sur toute la fenêtre */
+/* Style de base pour MyDiscord */
+
+/* Thèmes */
+.theme-dark {
+    --main-bg-color: #1E1F22;
+    --secondary-bg-color: #2B2D31;
+    --text-color: #FFFFFF;
+    --accent-color: #2EC4B6;
+    --hover-color: #6622CC;
+    --banner-color: #1E1F22;
+    --input-bg-color: #313338;
+    --server-bg-color: #1E1F22;
+    --channels-bg-color: #2B2D31;
+    --chat-bg-color: #313338;
+    --profile-bg-color: #2B2D31;
 }
 
-/* Colonne serveurs */
-.servers {
-    background-color: #1a1b22;
+.theme-light {
+    --main-bg-color: #F2F3F5;
+    --secondary-bg-color: #E3E5E8;
+    --text-color: #060607;
+    --accent-color: #2EC4B6;
+    --hover-color: #6622CC;
+    --banner-color: #E3E5E8;
+    --input-bg-color: #FFFFFF;
+    --server-bg-color: #E3E5E8;
+    --channels-bg-color: #F2F3F5;
+    --chat-bg-color: #FFFFFF;
+    --profile-bg-color: #F2F3F5;
+}
+
+.theme-violet {
+    --main-bg-color: #36393F;
+    --secondary-bg-color: #2F3136;
+    --text-color: #FFFFFF;
+    --accent-color: #8A4FFF;
+    --hover-color: #B388FF;
+    --banner-color: #43345C;
+    --input-bg-color: #40444B;
+    --server-bg-color: #43345C;
+    --channels-bg-color: #36393F;
+    --chat-bg-color: #40444B;
+    --profile-bg-color: #36393F;
+}
+
+/* Styles généraux */
+window {
+    background-color: var(--main-bg-color);
+    color: var(--text-color);
+}
+
+label {
+    color: var(--text-color);
+}
+
+/* Styles des formulaires */
+.welcome-title, .form-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 20px;
+}
+
+.my-entry {
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border-radius: 6px;
+    padding: 8px;
+    margin: 5px 0;
+    min-width: 300px;
+}
+
+.my-button {
+    background: var(--accent-color);
+    color: black;
+    font-weight: bold;
+    border-radius: 10px;
     padding: 10px;
-    border-right: 2px solid #8b5cf6; /* Bordure violette à droite */
-    border-left: 3px solid #8b5cf6; /* Bandeau violet gauche */
-    border-top: 2px solid #8b5cf6; /* Bordure violette en haut */
-    border-bottom: 2px solid #8b5cf6; /* Bordure violette en bas */
+    margin: 5px;
+    border: none;
+    box-shadow: none;
+}
+
+.my-button:hover {
+    background: var(--hover-color);
+    color: white;
+}
+
+/* Styles pour l'interface de chat */
+.servers {
+    background-color: var(--server-bg-color);
+    padding: 10px;
 }
 
 .server-button {
-    background-color: transparent;
-    border: 2px solid #8b5cf6; /* Bordure violette autour des boutons */
-    padding: 8px;
+    background-color: var(--accent-color);
+    color: white;
     border-radius: 50%;
-    transition: background 0.2s;
-    color: #d4d4ff;
+    width: 50px;
+    height: 50px;
+    margin: 5px;
     font-weight: bold;
     font-size: 18px;
 }
 
 .server-button:hover {
-    background-color: #4e5aff;
+    background-color: var(--hover-color);
 }
 
-/* Colonne conversations */
 .conversations {
-    background-color: #22232b;
+    background-color: var(--channels-bg-color);
     padding: 10px;
-    border-right: 2px solid #8b5cf6; /* Bordure violette à droite */
-    border-left: 3px solid #8b5cf6; /* Bandeau violet gauche */
-    border-top: 2px solid #8b5cf6; /* Bordure violette en haut */
-    border-bottom: 2px solid #8b5cf6; /* Bordure violette en bas */
 }
 
-.conversation-label {
-    color: #9ea7bd;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 14px;
-    margin-bottom: 4px;
-    border: 1px solid #8b5cf6; /* Bordure violette autour des labels */
+.conversation-button {
+    background-color: transparent;
+    color: var(--text-color);
+    border: none;
+    text-align: left;
+    padding: 8px;
+    margin: 2px 0;
+    border-radius: 4px;
 }
 
-.conversation-label:hover {
-    background-color: #333644;
-    color: #ffffff;
+.conversation-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Ajout d'une bordure bleue pour "général" */
-.conversation-label.general {
-    border: 1px solid #5865f2; /* Bordure bleue spécifique pour "général" */
-}
-
-/* Chat principal */
 .chat {
-    background-color: #262831;
-    padding: 15px;
-    border-radius: 0;
-    border-top: 3px solid #8b5cf6; /* Bandeau violet en haut */
-    border-left: 2px solid #8b5cf6; /* Bordure violette à gauche */
-    border-right: 2px solid #8b5cf6; /* Bordure violette à droite */
-    border-bottom: 2px solid #8b5cf6; /* Bordure violette en bas */
+    background-color: var(--chat-bg-color);
+    padding: 10px;
 }
 
 .chat-area {
-    background-color: #1f212a;
-    color: #f5f5f5;
+    background-color: var(--chat-bg-color);
+    color: var(--text-color);
+    border-radius: 4px;
     padding: 10px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: "Consolas", monospace;
-    border: 2px solid #8b5cf6; /* Bordure violette autour de la zone de chat */
 }
 
-/* Champ de texte */
 .chat-entry {
-    background-color: #2c2f3a;
-    color: #ffffff;
-    padding: 10px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
     border-radius: 8px;
     margin-top: 10px;
-    border: 2px solid #8b5cf6; /* Bordure violette autour du champ de texte */
-    font-size: 14px;
+    padding: 8px;
+    border: none;
 }
 
-/* Panneau profil */
 .profile {
-    background-color: #1a1c22;
+    background-color: var(--profile-bg-color);
     padding: 10px;
-    color: #ffffff;
-    border-left: 2px solid #8b5cf6; /* Bordure violette à gauche */
-    border-top: 3px solid #8b5cf6; /* Bandeau violet en haut */
-    border-right: 2px solid #8b5cf6; /* Bordure violette à droite */
-    border-bottom: 2px solid #8b5cf6; /* Bordure violette en bas */
 }
 
 .profile-label {
     font-weight: bold;
-    font-size: 15px;
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.theme-label {
     margin-top: 20px;
-    border-bottom: 2px solid #8b5cf6; /* Bordure violette sous le label du profil */
+    margin-bottom: 10px;
+}
+
+.theme-button {
+    background-color: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    margin: 3px 0;
+    text-align: left;
+    padding: 5px;
+}
+
+.theme-button:hover {
+    background-color: var(--accent-color);
+    color: white;
 }
