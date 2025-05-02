@@ -18,6 +18,9 @@ static bool auth_success = false;
 static bool connection_active = false;
 
 // Connection to server
+bool is_connection_active(void) {
+    return connection_active;  // Où connection_active est une variable globale dans client.c
+}
 bool init_connection(void) {
     struct sockaddr_in server_addr;
 

@@ -1,7 +1,6 @@
 #include <gtk/gtk.h>
 #include <string.h>
-#include <ctype.h>
-#include <glib.h>
+#include <ctype.h> // Ajout pour islower, isupper, isdigit
 #include "interface.h"
 #include "client.h"
 
@@ -50,11 +49,45 @@ static void update_channel_messages(int channel_id);
 static gboolean check_auth_response(GtkButton *button);
 static void show_error_dialog(const char *message);
 
+// Déclaration de is_connected en premier pour résoudre le conflit
+static bool is_connected(void);
+
 // Construction des écrans
 static GtkWidget* build_choice_screen(void);
 static GtkWidget* build_signin_screen(void);
 static GtkWidget* build_register_screen(void);
 static GtkWidget* build_chat_screen(void);
+
+bool has_connection_error = false;
+char connection_error_message[256] = "";
+
+// Fonction pour vérifier périodiquement l'état de la connexion
+static gboolean check_connection_status(gpointer data) {
+    if (!is_connected()) {
+        if (!has_connection_error) {
+            has_connection_error = true;
+            strncpy(connection_error_message, "Connexion au serveur perdue", sizeof(connection_error_message));
+            
+            // Afficher un message d'erreur
+            show_error_dialog("Connexion au serveur perdue");
+            
+            // Revenir à l'écran d'accueil
+            show_choice_screen();
+        }
+        return G_SOURCE_REMOVE;
+    }
+    return G_SOURCE_CONTINUE;
+}
+
+// Fonction pour vérifier si le client est connecté au serveur
+// Par
+static bool is_connected(void) {
+    // Implémentation temporaire
+    return true;
+    
+    // Décommenter quand client.h sera mis à jour
+    // return is_connection_active();
+}
 
 // Functions to navigate between the different screens keeping the same window
 static void show_choice_screen(void) {
@@ -87,7 +120,64 @@ static void show_chat_screen(void) {
     }
 }
 
-// Fonctions pour construire les différents écrans dans la fenêtre
+// Gestion du changement de thème
+static void on_theme_button_clicked(GtkButton *button, gpointer user_data) {
+    const char *theme = gtk_widget_get_name(GTK_WIDGET(button));
+
+    if (app_data.window != NULL) {
+        // Retirer tous les anciens thèmes
+        gtk_widget_remove_css_class(app_data.window, "theme-dark");
+        gtk_widget_remove_css_class(app_data.window, "theme-light");
+        gtk_widget_remove_css_class(app_data.window, "theme-violet");
+
+        // Appliquer le nouveau thème
+        gtk_widget_add_css_class(app_data.window, theme);
+    }
+}
+
+// Build main window 
+void build_main_window(GtkApplication *app) {
+    // Initialiser la structure AppData
+    memset(&app_data, 0, sizeof(AppData));
+    
+    // Créer la fenêtre principale
+    app_data.window = gtk_application_window_new(app);
+    gtk_window_set_title(GTK_WINDOW(app_data.window), "MyDiscord Client");
+    gtk_window_set_default_size(GTK_WINDOW(app_data.window), 1200, 800);
+    
+    // Appliquer le thème par défaut
+    gtk_widget_add_css_class(app_data.window, "theme-dark");
+
+    // Créer le stack pour les différentes vues
+    app_data.stack = gtk_stack_new();
+    gtk_stack_set_transition_type(GTK_STACK(app_data.stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
+    gtk_widget_set_hexpand(app_data.stack, TRUE);
+    gtk_widget_set_vexpand(app_data.stack, TRUE);
+
+    // Link to CSS style sheet
+    GtkCssProvider *css_provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_path(css_provider, "style.css");
+    gtk_style_context_add_provider_for_display(
+        gdk_display_get_default(),
+        GTK_STYLE_PROVIDER(css_provider),
+        GTK_STYLE_PROVIDER_PRIORITY_USER
+    );
+    g_object_unref(css_provider);
+
+    // Add the different screens to the stack
+    gtk_stack_add_named(GTK_STACK(app_data.stack), build_choice_screen(), "choice_screen");
+    gtk_stack_add_named(GTK_STACK(app_data.stack), build_signin_screen(), "signin_screen");
+    gtk_stack_add_named(GTK_STACK(app_data.stack), build_register_screen(), "register_screen");
+    gtk_stack_add_named(GTK_STACK(app_data.stack), build_chat_screen(), "chat_screen");
+
+    // Set the window content
+    gtk_window_set_child(GTK_WINDOW(app_data.window), app_data.stack);
+
+    // Present the window
+    gtk_window_present(GTK_WINDOW(app_data.window));
+}
+
+// Functions to build the different screens in the same window
 static GtkWidget* build_choice_screen(void) {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
@@ -367,28 +457,13 @@ static void show_error_dialog(const char *message) {
     const char *safe_message = message ? message : 
                               "Une erreur s'est produite lors de l'authentification.\nVeuillez réessayer avec des identifiants valides.";
     
-    // Créer une boîte de dialogue moderne (non dépréciée)
+    // Créer une boîte de dialogue moderne (correction pour GtkAlertDialog)
     if (app_data.window != NULL) {
-        GtkWidget *dialog = gtk_alert_dialog_new("%s", safe_message);
-        gtk_alert_dialog_show(GTK_ALERT_DIALOG(dialog), app_data.window);
+        GtkAlertDialog *dialog = gtk_alert_dialog_new("%s", safe_message);
+        gtk_alert_dialog_show(dialog, GTK_WINDOW(app_data.window)); // Cast en GtkWindow
         g_object_unref(dialog);
     } else {
         g_print("Error: %s\n", safe_message);
-    }
-}
-
-// Gestion du changement de thème
-static void on_theme_button_clicked(GtkButton *button, gpointer user_data) {
-    const char *theme = gtk_widget_get_name(GTK_WIDGET(button));
-
-    if (app_data.window != NULL) {
-        // Retirer tous les anciens thèmes
-        gtk_widget_remove_css_class(app_data.window, "theme-dark");
-        gtk_widget_remove_css_class(app_data.window, "theme-light");
-        gtk_widget_remove_css_class(app_data.window, "theme-violet");
-
-        // Appliquer le nouveau thème
-        gtk_widget_add_css_class(app_data.window, theme);
     }
 }
 
@@ -481,7 +556,7 @@ static void on_signin_button_clicked(GtkButton *button, gpointer user_data) {
     GtkEntry *entry_password = GTK_ENTRY(g_object_get_data(G_OBJECT(button), "entry_password"));
     
     if (entry_mail == NULL || entry_password == NULL) {
-        show_error_dialog("Erreur interne de l'application.");
+        show_error_dialog("Internal error in the app.");
         return;
     }
     
@@ -490,16 +565,20 @@ static void on_signin_button_clicked(GtkButton *button, gpointer user_data) {
     
     // Check that all fields are complete
     if (strlen(email) == 0 || strlen(password) == 0) {
-        show_error_dialog("Veuillez remplir tous les champs");
+        show_error_dialog("Please complete all fields");
         return;
     }
     
     // Validate email
     if (!validate_email(email)) {
-        show_error_dialog("Adresse email invalide");
+        show_error_dialog("Invalid email");
         return;
     }
     
+     // Notify user that authentication is in process
+     gtk_button_set_label(button, "Connection in process...");
+     gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+
     // Prepare and send command to server
     char command[BUFFER_SIZE];
     sprintf(command, "/login %s %s", email, password);
@@ -544,48 +623,6 @@ void add_message_to_chat(const char *message) {
     GtkTextMark *mark = gtk_text_buffer_create_mark(buffer, NULL, &iter, FALSE);
     gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(app_data.main_chat_area), mark, 0.0, TRUE, 0.0, 1.0);
     gtk_text_buffer_delete_mark(buffer, mark);
-}
-
-// Main window 
-void build_main_window(GtkApplication *app) {
-    // Initialiser la structure AppData
-    memset(&app_data, 0, sizeof(AppData));
-    
-    // Créer la fenêtre principale
-    app_data.window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(app_data.window), "MyDiscord Client");
-    gtk_window_set_default_size(GTK_WINDOW(app_data.window), 1200, 800);
-    
-    // Appliquer le thème par défaut
-    gtk_widget_add_css_class(app_data.window, "theme-dark");
-
-    // Créer le stack pour les différentes vues
-    app_data.stack = gtk_stack_new();
-    gtk_stack_set_transition_type(GTK_STACK(app_data.stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
-    gtk_widget_set_hexpand(app_data.stack, TRUE);
-    gtk_widget_set_vexpand(app_data.stack, TRUE);
-
-    // Link to CSS style sheet
-    GtkCssProvider *css_provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(css_provider, "style.css");
-    gtk_style_context_add_provider_for_display(
-        gdk_display_get_default(),
-        GTK_STYLE_PROVIDER(css_provider),
-        GTK_STYLE_PROVIDER_PRIORITY_USER
-    );
-    g_object_unref(css_provider);
-
-    // Add the different screens to the stack
-    gtk_stack_add_named(GTK_STACK(app_data.stack), build_choice_screen(), "choice_screen");
-    gtk_stack_add_named(GTK_STACK(app_data.stack), build_signin_screen(), "signin_screen");
-    gtk_stack_add_named(GTK_STACK(app_data.stack), build_register_screen(), "register_screen");
-    gtk_stack_add_named(GTK_STACK(app_data.stack), build_chat_screen(), "chat_screen");
-
-    // Set the window content
-    gtk_window_set_child(GTK_WINDOW(app_data.window), app_data.stack);
-
-    // Present the window
-    gtk_window_present(GTK_WINDOW(app_data.window));
 }
 
 // Send messages

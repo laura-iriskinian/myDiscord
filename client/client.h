@@ -9,6 +9,7 @@
 
 // Connection functions
 bool init_connection(void);
+bool is_connection_active(void);
 void close_connection(void);
 void start_receive_thread(void);
 

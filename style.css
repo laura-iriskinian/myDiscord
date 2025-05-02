@@ -1,7 +1,7 @@
 /* Style de base pour MyDiscord */
 
 /* Thèmes */
-.theme-dark {
+/*.theme-dark {
     --main-bg-color: #1E1F22;
     --secondary-bg-color: #2B2D31;
     --text-color: #FFFFFF;
@@ -44,17 +44,17 @@
 }
 
 /* Styles généraux */
-window {
+/* window {
     background-color: var(--main-bg-color);
     color: var(--text-color);
 }
 
 label {
     color: var(--text-color);
-}
+} */
 
 /* Styles des formulaires */
-.welcome-title, .form-title {
+/* .welcome-title, .form-title {
     font-size: 24px;
     font-weight: bold;
     margin: 20px;
@@ -83,10 +83,10 @@ label {
 .my-button:hover {
     background: var(--hover-color);
     color: white;
-}
+} */
 
 /* Styles pour l'interface de chat */
-.servers {
+/* .servers {
     background-color: var(--server-bg-color);
     padding: 10px;
 }
@@ -109,9 +109,9 @@ label {
 .conversations {
     background-color: var(--channels-bg-color);
     padding: 10px;
-}
+} */
 
-.conversation-button {
+/* .conversation-button {
     background-color: transparent;
     color: var(--text-color);
     border: none;
@@ -144,9 +144,9 @@ label {
     margin-top: 10px;
     padding: 8px;
     border: none;
-}
+} */
 
-.profile {
+/* .profile {
     background-color: var(--profile-bg-color);
     padding: 10px;
 }
@@ -174,5 +174,220 @@ label {
 
 .theme-button:hover {
     background-color: var(--accent-color);
+    color: white;
+} */
+
+/* Style de base pour MyDiscord */
+
+/* Thèmes */
+.theme-dark window {
+    background-color: #1E1F22;
+    color: #FFFFFF;
+}
+
+.theme-dark .servers {
+    background-color: #1E1F22;
+}
+
+.theme-dark .conversations {
+    background-color: #2B2D31;
+}
+
+.theme-dark .chat {
+    background-color: #313338;
+}
+
+.theme-dark .profile {
+    background-color: #2B2D31;
+}
+
+.theme-dark .my-entry {
+    background-color: #313338;
+    color: #FFFFFF;
+}
+
+.theme-dark .my-button {
+    background-color: #2EC4B6;
+    color: black;
+}
+
+.theme-dark .my-button:hover {
+    background-color: #6622CC;
+    color: white;
+}
+
+/* Theme Light */
+.theme-light window {
+    background-color: #F2F3F5;
+    color: #060607;
+}
+
+.theme-light .servers {
+    background-color: #E3E5E8;
+}
+
+.theme-light .conversations {
+    background-color: #F2F3F5;
+}
+
+.theme-light .chat {
+    background-color: #FFFFFF;
+}
+
+.theme-light .profile {
+    background-color: #F2F3F5;
+}
+
+.theme-light .my-entry {
+    background-color: #FFFFFF;
+    color: #060607;
+}
+
+.theme-light .my-button {
+    background-color: #2EC4B6; 
+    color: black;
+}
+
+.theme-light .my-button:hover {
+    background-color: #6622CC;
+    color: white;
+}
+
+/* Theme Violet */
+.theme-violet window {
+    background-color: #36393F;
+    color: #FFFFFF;
+}
+
+.theme-violet .servers {
+    background-color: #43345C;
+}
+
+.theme-violet .conversations {
+    background-color: #36393F;
+}
+
+.theme-violet .chat {
+    background-color: #40444B;
+}
+
+.theme-violet .profile {
+    background-color: #36393F;
+}
+
+.theme-violet .my-entry {
+    background-color: #40444B;
+    color: #FFFFFF;
+}
+
+.theme-violet .my-button {
+    background-color: #8A4FFF;
+    color: white;
+}
+
+.theme-violet .my-button:hover {
+    background-color: #B388FF;
+    color: white;
+}
+
+/* Styles généraux */
+label {
+    color: inherit;
+}
+
+/* Styles des formulaires */
+.welcome-title, .form-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 20px;
+}
+
+.my-entry {
+    border-radius: 6px;
+    padding: 8px;
+    margin: 5px 0;
+    min-width: 300px;
+}
+
+.my-button {
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    box-shadow: none;
+}
+
+/* Styles pour l'interface de chat */
+.servers {
+    padding: 10px;
+}
+
+.server-button {
+    border-radius: 50%;
+    margin: 5px;
+    font-weight: bold;
+    font-size: 18px;
+    min-height: 50px;
+    min-width: 50px;
+}
+
+.conversations {
+    padding: 10px;
+}
+
+.conversation-button {
+    background-color: transparent;
+    border: none;
+    padding: 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+}
+
+.conversation-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.chat {
+    padding: 10px;
+}
+
+.chat-area {
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.chat-entry {
+    border-radius: 8px;
+    margin-top: 10px;
+    padding: 8px;
+    border: none;
+}
+
+.profile {
+    padding: 10px;
+}
+
+.profile-label {
+    font-weight: bold;
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.theme-label {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.theme-button {
+    background-color: transparent;
+    border: 1px solid #2EC4B6;
+    border-radius: 4px;
+    margin: 3px 0;
+    padding: 5px;
+}
+
+.theme-button:hover {
+    background-color: #2EC4B6;
     color: white;
 }
