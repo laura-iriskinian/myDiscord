@@ -183,12 +183,12 @@ static GtkWidget* build_choice_screen(void) {
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
 
-    GtkWidget *label = gtk_label_new("Bienvenue sur MyDiscord");
+    GtkWidget *label = gtk_label_new("Welcome to my Discord");
     gtk_widget_add_css_class(label, "welcome-title");
     gtk_box_append(GTK_BOX(box), label);
 
-    GtkWidget *signin_button = gtk_button_new_with_label("Connexion");
-    GtkWidget *register_button = gtk_button_new_with_label("Inscription");
+    GtkWidget *signin_button = gtk_button_new_with_label("Connect");
+    GtkWidget *register_button = gtk_button_new_with_label("Register");
     
     gtk_widget_add_css_class(signin_button, "my-button");
     gtk_widget_add_css_class(register_button, "my-button");

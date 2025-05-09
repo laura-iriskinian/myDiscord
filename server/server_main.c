@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     // Run server (this function is blocking)
     run_server();
     
-    // stop the server (this should never be used here)
+    // top the server (this should never be used here)
     stop_server();
     
     return EXIT_SUCCESS;
