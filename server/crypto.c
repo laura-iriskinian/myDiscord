@@ -3,11 +3,10 @@
 #include <string.h>
 #include "crypto.h"
 
-// Clé de chiffrement simple (à remplacer par une meilleure solution en production)
+// Simple encryption 
 static const char *SECRET_KEY = "MyDiscordSecretKey";
 
-// Fonction simple de hachage pour les mots de passe
-// Note: Dans une application réelle, utiliser bcrypt, Argon2 ou PBKDF2
+// Simple encryption function for passwords (can use bcrypt)
 char* encrypt_password(const char *password) {
     if (!password) return NULL;
     
@@ -17,14 +16,14 @@ char* encrypt_password(const char *password) {
     
     if (!hashed) return NULL;
     
-    // XOR simple avec la clé secrète
+    // Basic XOR with secret key
     for (size_t i = 0; i < passlen; i++) {
         hashed[i] = password[i] ^ SECRET_KEY[i % keylen];
     }
     
     hashed[passlen] = '\0';
     
-    // Convertir en hexadécimal pour le stockage
+    // Convert to hexadecimal for stocking in database
     char *hex = (char*)malloc(passlen * 2 + 1);
     if (!hex) {
         free(hashed);
@@ -39,7 +38,7 @@ char* encrypt_password(const char *password) {
     return hex;
 }
 
-// Vérifier un mot de passe
+// Check a password
 bool verify_password(const char *password, const char *hashed) {
     if (!password || !hashed) return false;
     
@@ -52,7 +51,7 @@ bool verify_password(const char *password, const char *hashed) {
     return result;
 }
 
-// Chiffrer un message
+// Encrypt a message
 char* encrypt_message(const char *message) {
     if (!message) return NULL;
     
@@ -62,14 +61,14 @@ char* encrypt_message(const char *message) {
     
     if (!encrypted) return NULL;
     
-    // XOR simple avec la clé secrète
+    // Simple XOR with secret key
     for (size_t i = 0; i < msglen; i++) {
         encrypted[i] = message[i] ^ SECRET_KEY[i % keylen];
     }
     
     encrypted[msglen] = '\0';
     
-    // Convertir en hexadécimal pour le stockage
+    // Convert to hexadecimal for stocking in database
     char *hex = (char*)malloc(msglen * 2 + 1);
     if (!hex) {
         free(encrypted);
@@ -84,7 +83,7 @@ char* encrypt_message(const char *message) {
     return hex;
 }
 
-// Déchiffrer un message
+// Decrypt a message
 char* decrypt_message(const char *encrypted) {
     if (!encrypted) return NULL;
     
@@ -94,7 +93,7 @@ char* decrypt_message(const char *encrypted) {
     size_t msglen = hexlen / 2;
     size_t keylen = strlen(SECRET_KEY);
     
-    // Convertir l'hexadécimal en binaire
+    // Convert from hexadecimal to binary
     unsigned char *binary = (unsigned char*)malloc(msglen);
     if (!binary) return NULL;
     
@@ -102,7 +101,7 @@ char* decrypt_message(const char *encrypted) {
         sscanf(encrypted + i * 2, "%2hhx", &binary[i]);
     }
     
-    // Déchiffrer avec XOR
+    // Decrypt with XOR
     char *decrypted = (char*)malloc(msglen + 1);
     if (!decrypted) {
         free(binary);

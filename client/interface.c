@@ -1,28 +1,25 @@
 #include <gtk/gtk.h>
 #include <string.h>
-#include <ctype.h> // Ajout pour islower, isupper, isdigit
+#include <ctype.h> // used for islower, isupper, isdigit in password verification
 #include "interface.h"
 #include "client.h"
 
-// Définir nos propres structures pour l'interface utilisateur
-// pour éviter les dépendances aux fichiers du serveur
-
-// Structure pour représenter un canal dans l'interface
+// Structure to represent a channel in the interface
 typedef struct {
-    int id;             // ID du canal
-    char name[50];      // Nom du canal
-    bool is_private;    // Est-ce un canal privé
+    int id;             // channel ID 
+    char name[50];      // Channel name
+    bool is_private;    // is channel private
 } UIChannel;
 
-// Structure pour représenter un message dans l'interface
+// Structure to represent a message in the interface
 typedef struct {
-    int id;             // ID du message
-    char sender[50];    // Nom de l'expéditeur
-    char content[1024]; // Contenu du message
-    char timestamp[20]; // Horodatage formaté
+    int id;             // message ID
+    char sender[50];    // Name of sender
+    char content[1024]; // message content
+    char timestamp[20]; // timestamp
 } UIMessage;
 
-// Structures pour les données de l'application
+// Structures for app database
 typedef struct {
     GtkWidget *window;
     GtkWidget *stack;
@@ -32,7 +29,7 @@ typedef struct {
     int current_channel_id;
 } AppData;
 
-// Variable globale pour les données de l'application
+// global variable for app data
 static AppData app_data;
 
 // Forward declarations
@@ -49,10 +46,10 @@ static void update_channel_messages(int channel_id);
 static gboolean check_auth_response(GtkButton *button);
 static void show_error_dialog(const char *message);
 
-// Déclaration de is_connected en premier pour résoudre le conflit
+// Declaration of is_connected first to prevent conflict
 static bool is_connected(void);
 
-// Construction des écrans
+// Screen building
 static GtkWidget* build_choice_screen(void);
 static GtkWidget* build_signin_screen(void);
 static GtkWidget* build_register_screen(void);
@@ -61,17 +58,17 @@ static GtkWidget* build_chat_screen(void);
 bool has_connection_error = false;
 char connection_error_message[256] = "";
 
-// Fonction pour vérifier périodiquement l'état de la connexion
+// Function to check periodically the state of the connection
 static gboolean check_connection_status(gpointer data) {
     if (!is_connected()) {
         if (!has_connection_error) {
             has_connection_error = true;
-            strncpy(connection_error_message, "Connexion au serveur perdue", sizeof(connection_error_message));
+            strncpy(connection_error_message, "Connection to server lost.", sizeof(connection_error_message));
             
-            // Afficher un message d'erreur
-            show_error_dialog("Connexion au serveur perdue");
+            // Display error message
+            show_error_dialog("Connection to server lost.");
             
-            // Revenir à l'écran d'accueil
+            // Return to main screen
             show_choice_screen();
         }
         return G_SOURCE_REMOVE;
@@ -79,14 +76,9 @@ static gboolean check_connection_status(gpointer data) {
     return G_SOURCE_CONTINUE;
 }
 
-// Fonction pour vérifier si le client est connecté au serveur
-// Par
+// Function to check if the client is connected to the server
 static bool is_connected(void) {
-    // Implémentation temporaire
-    return true;
-    
-    // Décommenter quand client.h sera mis à jour
-    // return is_connection_active();
+    return is_connection_active();
 }
 
 // Functions to navigate between the different screens keeping the same window
@@ -112,43 +104,43 @@ static void show_chat_screen(void) {
     if (app_data.stack != NULL) {
         gtk_stack_set_visible_child_name(GTK_STACK(app_data.stack), "chat_screen");
         
-        // Initialiser le canal courant (canal principal par défaut)
+        // Initialize current channel(main channel by default)
         app_data.current_channel_id = 1;
         
-        // Mettre à jour les messages
+        // Update messages
         update_channel_messages(app_data.current_channel_id);
     }
 }
 
-// Gestion du changement de thème
+// Manage change of interface theme
 static void on_theme_button_clicked(GtkButton *button, gpointer user_data) {
     const char *theme = gtk_widget_get_name(GTK_WIDGET(button));
 
     if (app_data.window != NULL) {
-        // Retirer tous les anciens thèmes
+        // Remove all themes
         gtk_widget_remove_css_class(app_data.window, "theme-dark");
         gtk_widget_remove_css_class(app_data.window, "theme-light");
         gtk_widget_remove_css_class(app_data.window, "theme-violet");
 
-        // Appliquer le nouveau thème
+        // Apply new theme
         gtk_widget_add_css_class(app_data.window, theme);
     }
 }
 
 // Build main window 
 void build_main_window(GtkApplication *app) {
-    // Initialiser la structure AppData
+    // Initialize AppData structure
     memset(&app_data, 0, sizeof(AppData));
     
-    // Créer la fenêtre principale
+    // Create main window
     app_data.window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(app_data.window), "MyDiscord Client");
     gtk_window_set_default_size(GTK_WINDOW(app_data.window), 1200, 800);
     
-    // Appliquer le thème par défaut
+    // Apply theme by default
     gtk_widget_add_css_class(app_data.window, "theme-dark");
 
-    // Créer le stack pour les différentes vues
+    // Create the stack for the different views
     app_data.stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(app_data.stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
     gtk_widget_set_hexpand(app_data.stack, TRUE);
@@ -207,7 +199,7 @@ static GtkWidget* build_signin_screen(void) {
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
 
-    GtkWidget *label = gtk_label_new("Connexion");
+    GtkWidget *label = gtk_label_new("Connection");
     gtk_widget_add_css_class(label, "form-title");
     gtk_box_append(GTK_BOX(box), label);
 
@@ -217,13 +209,13 @@ static GtkWidget* build_signin_screen(void) {
     gtk_box_append(GTK_BOX(box), entry_mail);
     
     GtkWidget *entry_password = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Mot de passe");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Password");
     gtk_entry_set_visibility(GTK_ENTRY(entry_password), FALSE);
     gtk_widget_add_css_class(entry_password, "my-entry");
     gtk_box_append(GTK_BOX(box), entry_password);
 
     GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-    GtkWidget *signin_button = gtk_button_new_with_label("Connexion");
+    GtkWidget *signin_button = gtk_button_new_with_label("Connection");
     gtk_widget_add_css_class(signin_button, "my-button");
     
     // Stock the fields references
@@ -234,7 +226,7 @@ static GtkWidget* build_signin_screen(void) {
     g_signal_connect(signin_button, "clicked", G_CALLBACK(on_signin_button_clicked), NULL);
     gtk_box_append(GTK_BOX(button_box), signin_button);
 
-    GtkWidget *back_button = gtk_button_new_with_label("Retour");
+    GtkWidget *back_button = gtk_button_new_with_label("Back");
     gtk_widget_add_css_class(back_button, "my-button");
     g_signal_connect(back_button, "clicked", G_CALLBACK(show_choice_screen), NULL);
     gtk_box_append(GTK_BOX(button_box), back_button);
@@ -249,17 +241,17 @@ static GtkWidget* build_register_screen(void) {
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
 
-    GtkWidget *label = gtk_label_new("Inscription");
+    GtkWidget *label = gtk_label_new("Registration");
     gtk_widget_add_css_class(label, "form-title");
     gtk_box_append(GTK_BOX(box), label);
 
     GtkWidget *entry_name = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_name), "Nom");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_name), "Name");
     gtk_widget_add_css_class(entry_name, "my-entry");
     gtk_box_append(GTK_BOX(box), entry_name);
     
     GtkWidget *entry_first_name = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_first_name), "Prénom");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_first_name), "First name");
     gtk_widget_add_css_class(entry_first_name, "my-entry");
     gtk_box_append(GTK_BOX(box), entry_first_name);
     
@@ -269,13 +261,13 @@ static GtkWidget* build_register_screen(void) {
     gtk_box_append(GTK_BOX(box), entry_mail);
     
     GtkWidget *entry_password = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Mot de passe");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Password");
     gtk_entry_set_visibility(GTK_ENTRY(entry_password), FALSE);
     gtk_widget_add_css_class(entry_password, "my-entry");
     gtk_box_append(GTK_BOX(box), entry_password);
 
     GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-    GtkWidget *register_button = gtk_button_new_with_label("S'inscrire");
+    GtkWidget *register_button = gtk_button_new_with_label("Register");
     gtk_widget_add_css_class(register_button, "my-button");
 
     // stock the references in the fields
@@ -288,7 +280,7 @@ static GtkWidget* build_register_screen(void) {
     g_signal_connect(register_button, "clicked", G_CALLBACK(on_register_button_clicked), NULL);
     gtk_box_append(GTK_BOX(button_box), register_button);
 
-    GtkWidget *back_button = gtk_button_new_with_label("Retour");
+    GtkWidget *back_button = gtk_button_new_with_label("Back");
     gtk_widget_add_css_class(back_button, "my-button");
     g_signal_connect(back_button, "clicked", G_CALLBACK(show_choice_screen), NULL);
     gtk_box_append(GTK_BOX(button_box), back_button);
@@ -319,7 +311,7 @@ static GtkWidget* build_chat_screen(void) {
     
     // Récupérer les canaux depuis le backend (à implémenter)
     // Pour l'instant, ajouter quelques canaux de test
-    const char *channel_names[] = {"Général", "Annonces", "Entraide", "Général-privé", "Discussions"};
+    const char *channel_names[] = {"General", "Notice board", "Community help", "General-private", "Discussions"};
     int channel_ids[] = {1, 2, 3, 4, 5};
     
     for (int i = 0; i < 5; i++) {
@@ -373,22 +365,22 @@ static GtkWidget* build_chat_screen(void) {
     
     gtk_box_append(GTK_BOX(chat_panel), input_box);
     
-    // 4. Panneau de profil (à droite)
+    // 4. Profile pannel (on the right)
     GtkWidget *profile_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_size_request(profile_panel, 140, -1);
     gtk_widget_add_css_class(profile_panel, "profile");
     
-    GtkWidget *profile_label = gtk_label_new("Profil");
+    GtkWidget *profile_label = gtk_label_new("Profile");
     gtk_widget_add_css_class(profile_label, "profile-label");
     gtk_box_append(GTK_BOX(profile_panel), profile_label);
     
-    GtkWidget *theme_label = gtk_label_new("Choisir un thème :");
+    GtkWidget *theme_label = gtk_label_new("Select a theme :");
     gtk_widget_add_css_class(theme_label, "theme-label");
     gtk_box_append(GTK_BOX(profile_panel), theme_label);
     
-    // Boutons de thèmes
+    // Theme buttons
     const char *themes[] = {"theme-dark", "theme-light", "theme-violet"};
-    const char *labels[] = {"Thème Sombre", "Thème Clair", "Thème Violet"};
+    const char *labels[] = {"Dark theme", "Light theme", "Purple theme"};
     
     for (int i = 0; i < 3; i++) {
         GtkWidget *theme_btn = gtk_button_new_with_label(labels[i]);
@@ -398,13 +390,13 @@ static GtkWidget* build_chat_screen(void) {
         gtk_box_append(GTK_BOX(profile_panel), theme_btn);
     }
     
-    // Bouton de déconnexion
-    GtkWidget *logout_button = gtk_button_new_with_label("Déconnexion");
+    // Disconnection button
+    GtkWidget *logout_button = gtk_button_new_with_label("Disconnect");
     gtk_widget_add_css_class(logout_button, "my-button");
     g_signal_connect(logout_button, "clicked", G_CALLBACK(show_choice_screen), NULL);
     gtk_box_append(GTK_BOX(profile_panel), logout_button);
     
-    // Assembler tous les panneaux
+    // Assemble all panels
     gtk_box_append(GTK_BOX(main_box), servers_panel);
     gtk_box_append(GTK_BOX(main_box), channels_panel);
     gtk_box_append(GTK_BOX(main_box), chat_panel);
@@ -455,50 +447,48 @@ bool validate_password(const char *password) {
 static void show_error_dialog(const char *message) {
     // Use general error message to avoid UTF-8 problems
     const char *safe_message = message ? message : 
-                              "Une erreur s'est produite lors de l'authentification.\nVeuillez réessayer avec des identifiants valides.";
+                              "An error occured druing authentication.\nPlease try again with valid credentials.";
     
-    // Créer une boîte de dialogue moderne (correction pour GtkAlertDialog)
+    // Create a modern dialog box
     if (app_data.window != NULL) {
         GtkAlertDialog *dialog = gtk_alert_dialog_new("%s", safe_message);
-        gtk_alert_dialog_show(dialog, GTK_WINDOW(app_data.window)); // Cast en GtkWindow
+        gtk_alert_dialog_show(dialog, GTK_WINDOW(app_data.window)); 
         g_object_unref(dialog);
     } else {
         g_print("Error: %s\n", safe_message);
     }
 }
 
-// Gestion du changement de canal
+// Manage change of channel
 static void on_channel_clicked(GtkButton *button, gpointer id_ptr) {
     if (id_ptr != NULL) {
         int channel_id = *(int*)id_ptr;
         
-        // Mettre à jour le canal courant
+        // Update current channel
         app_data.current_channel_id = channel_id;
         
-        // Commander au serveur de rejoindre le canal
+        // Command server to join the channel
         char command[BUFFER_SIZE];
         sprintf(command, "/join %d", channel_id);
         send_message_to_server(command);
         
-        // Mettre à jour les messages affichés
+        // Update the displayed messages
         update_channel_messages(channel_id);
     }
 }
 
-// Mise à jour des messages du canal
+// Update the channel messages
 static void update_channel_messages(int channel_id) {
     if (app_data.main_chat_area != NULL) {
         GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(app_data.main_chat_area));
         
-        // Effacer le contenu actuel
+        // Delete current content
         gtk_text_buffer_set_text(buffer, "", -1);
         
-        // En attente des messages du serveur, un message de chargement est affiché
+        // While waiting for server messages, loading message displayed
         GtkTextIter iter;
         gtk_text_buffer_get_end_iter(buffer, &iter);
-        gtk_text_buffer_insert(buffer, &iter, "Chargement des messages...\n", -1);
-        
-        // Les messages réels seront chargés par la fonction de réception des messages du serveur
+        gtk_text_buffer_insert(buffer, &iter, "Loading messages...\n", -1);
     }
 }
 
@@ -511,7 +501,7 @@ static void on_register_button_clicked(GtkButton *button, gpointer user_data) {
     GtkEntry *entry_password = GTK_ENTRY(g_object_get_data(G_OBJECT(button), "entry_password"));
     
     if (entry_name == NULL || entry_first_name == NULL || entry_mail == NULL || entry_password == NULL) {
-        show_error_dialog("Erreur interne de l'application.");
+        show_error_dialog("Internal error in the app.");
         return;
     }
     
@@ -522,21 +512,21 @@ static void on_register_button_clicked(GtkButton *button, gpointer user_data) {
     
     // Check that all fields are complete
     if (strlen(name) == 0 || strlen(first_name) == 0 || strlen(email) == 0 || strlen(password) == 0) {
-        show_error_dialog("Veuillez remplir tous les champs");
+        show_error_dialog("Please complete all fields");
         return;
     }
     
     // Validate email
     if (!validate_email(email)) {
-        show_error_dialog("Adresse email invalide");
+        show_error_dialog("Invalid email address");
         return;
     }
     
     // Validate password
     if (!validate_password(password)) {
-        show_error_dialog("Le mot de passe doit contenir au moins 10 caractères, "
-                         "une lettre majuscule, une lettre minuscule, "
-                         "un chiffre et un caractère spécial");
+        show_error_dialog("The password must contain at least 10 characters, "
+                         "one upper case letter, one lower case letter, "
+                         "one digit and a special character");
         return;
     }
     
@@ -608,7 +598,7 @@ static gboolean check_auth_response(GtkButton *button) {
     return G_SOURCE_CONTINUE;
 }
 
-// Fonction pour ajouter un message au chat
+// Function to add a message to chat
 void add_message_to_chat(const char *message) {
     if (app_data.main_chat_area == NULL) return;
     
@@ -619,7 +609,7 @@ void add_message_to_chat(const char *message) {
     gtk_text_buffer_insert(buffer, &iter, message, -1);
     gtk_text_buffer_insert(buffer, &iter, "\n", -1);
     
-    // Faire défiler vers le bas pour toujours voir le dernier message
+    // Scroll to the bottom to see the most recent message
     GtkTextMark *mark = gtk_text_buffer_create_mark(buffer, NULL, &iter, FALSE);
     gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(app_data.main_chat_area), mark, 0.0, TRUE, 0.0, 1.0);
     gtk_text_buffer_delete_mark(buffer, mark);
@@ -663,19 +653,19 @@ static void on_send_message_clicked(GtkButton *button, gpointer user_data) {
     g_free(message);
 }
 
-// Fonction pour traiter les messages entrants du serveur
+// Function to handle incoming messages from server
 void process_incoming_message(const char *message) {
-    // Si nous sommes dans l'écran de chat, afficher le message
+    // When in chat screen, display message
     if (app_data.stack != NULL && 
         gtk_stack_get_visible_child_name(GTK_STACK(app_data.stack)) &&
         strcmp(gtk_stack_get_visible_child_name(GTK_STACK(app_data.stack)), "chat_screen") == 0) {
         
-        // Ajouter le message à la zone de chat
+        // Add the message to the chat area
         add_message_to_chat(message);
     }
 }
 
-// Fonction pour créer un nouveau canal
+// Function to create a new channel
 void create_new_channel(const char *name, bool is_private) {
     char command[BUFFER_SIZE];
     if (is_private) {
@@ -686,22 +676,21 @@ void create_new_channel(const char *name, bool is_private) {
     send_message_to_server(command);
 }
 
-// Fonction pour supprimer un canal
+// Function to delete a channel
 void delete_channel(int channel_id) {
     char command[BUFFER_SIZE];
     sprintf(command, "/delete %d", channel_id);
     send_message_to_server(command);
 }
 
-// Fonction pour mettre à jour l'interface utilisateur
-// Cette fonction peut être appelée périodiquement ou à des moments clés
+// Function to update user interface
 void update_ui() {
-    // Si nous sommes dans l'écran de chat, mettre à jour les canaux et les messages
+    // If on the chat screen, update the channels and messages
     if (app_data.stack != NULL && 
         gtk_stack_get_visible_child_name(GTK_STACK(app_data.stack)) &&
         strcmp(gtk_stack_get_visible_child_name(GTK_STACK(app_data.stack)), "chat_screen") == 0) {
         
-        // Mettre à jour les messages du canal courant
+        // Update all message of current channel
         update_channel_messages(app_data.current_channel_id);
     }
 }

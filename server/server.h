@@ -29,7 +29,7 @@ void disconnect_client(int client_id);
 void broadcast_message(int sender_id, const char* message, int channel_id);
 void send_to_client(int client_id, const char* message);
 
-// Authentification
+// Authentication
 bool authenticate_user(int client_id, const char* email, const char* password);
 bool register_user(int client_id, const char* firstname, const char* lastname, 
                    const char* email, const char* password);

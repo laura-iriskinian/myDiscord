@@ -8,7 +8,7 @@
 #include "user.h"
 #include "crypto.h"
 
-// Sauvegarder un message dans la base de données
+// Save a message in the database
 bool save_message(int user_id, int channel_id, const char *content) {
     // Vérifier si l'utilisateur peut poster dans ce canal
     if (!can_access_channel(user_id, channel_id)) {
@@ -47,7 +47,7 @@ bool save_message(int user_id, int channel_id, const char *content) {
     return true;
 }
 
-// Récupérer un message par son ID
+// Get a message with its ID
 bool get_message_by_id(int message_id, message_t *message) {
     char query[200];
     sprintf(query, "SELECT * FROM messages WHERE id=%d", message_id);
@@ -63,20 +63,20 @@ bool get_message_by_id(int message_id, message_t *message) {
         return false;
     }
     
-    // Remplir la structure message
+    // Complete message structure
     message->id = atoi(PQgetvalue(result, 0, 0));
     message->user_id = atoi(PQgetvalue(result, 0, 1));
     message->channel_id = atoi(PQgetvalue(result, 0, 2));
     strcpy(message->content, PQgetvalue(result, 0, 3));
     
-    // Convertir le timestamp PostgreSQL en time_t
+    // Convert timestamp in PostgreSQL in time_t
     struct tm tm_time;
     strptime(PQgetvalue(result, 0, 4), "%Y-%m-%d %H:%M:%S", &tm_time);
     message->timestamp = mktime(&tm_time);
     
     message->is_encrypted = strcmp(PQgetvalue(result, 0, 5), "t") == 0;
     
-    // Si le message est chiffré, le déchiffrer
+    // If message is encrypted, decrypt
     if (message->is_encrypted) {
         char *decrypted = decrypt_message(message->content);
         if (decrypted) {
@@ -89,7 +89,7 @@ bool get_message_by_id(int message_id, message_t *message) {
     return true;
 }
 
-// Supprimer un message
+// Delete a message
 bool delete_message(int message_id, int user_id) {
     // Vérifier que l'utilisateur est l'auteur du message ou un modérateur
     message_t message;
@@ -127,7 +127,7 @@ bool delete_message(int message_id, int user_id) {
     return true;
 }
 
-// Ajouter une réaction à un message
+// Add a reaction to a message
 bool add_reaction(int message_id, int user_id, const char *emoji) {
     // Vérifier que le message existe
     message_t message;
@@ -176,7 +176,7 @@ bool add_reaction(int message_id, int user_id, const char *emoji) {
     return true;
 }
 
-// Supprimer une réaction
+// Remove a reaction
 bool remove_reaction(int message_id, int user_id, const char *emoji) {
     char query[300];
     sprintf(query, 

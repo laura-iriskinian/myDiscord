@@ -158,7 +158,7 @@ bool verify_login(const char *email, const char *password, user_t *user) {
         return false;
     }
     
-    // Get corresponding user's hashed password
+    // Get corresponding user's encrypted password
     char query[200];
     sprintf(query, "SELECT password FROM users WHERE id=%d", user->id);
     
@@ -173,7 +173,7 @@ bool verify_login(const char *email, const char *password, user_t *user) {
         return false;
     }
     
-    // Get hashed password
+    // Get encrypted password
     char stored_hash[100];
     strcpy(stored_hash, PQgetvalue(result, 0, 0));
     
@@ -261,9 +261,7 @@ bool promote_user(int user_id, int new_role) {
     return true;
 }
 
-// Function to hash a password
+// Function to encrypt a password
 char* hash_password(const char *password) {
-    // Nous utilisons notre fonction de chiffrement pour simuler un hash
-    // Dans une application réelle, utilisez bcrypt, Argon2, ou PBKDF2
     return encrypt_password(password);
 }

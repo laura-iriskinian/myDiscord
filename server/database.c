@@ -4,7 +4,7 @@
 #include "database.h"
 #include "load_env.h"
 
-// Variable globale pour la connexion à la base de données
+// Global variable to connect to database
 static PGconn *db_connection = NULL;
 
 // Initiate the connection to the database

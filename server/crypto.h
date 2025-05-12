@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-// Fonctions pour le chiffrement et déchiffrement
+// Functions for encryption and decryption
 char* encrypt_password(const char *password);
 bool verify_password(const char *password, const char *hashed);
 char* encrypt_message(const char *message);

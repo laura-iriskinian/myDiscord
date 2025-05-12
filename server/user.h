@@ -13,7 +13,7 @@ typedef struct {
     int role;               // Role: 1=member, 2=moderator, 3=admin
 } user_t;
 
-// Functiosn to manage user
+// Functions to manage user
 bool create_user(user_t *user, const char *password);
 bool update_user(user_t *user);
 bool delete_user(int user_id);

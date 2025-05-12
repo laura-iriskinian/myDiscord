@@ -3,28 +3,28 @@
 
 #include <stdbool.h>
 
-// Structure pour représenter un canal
+// Structure to represent a channel
 typedef struct {
-    int id;                 // ID dans la base de données
-    char name[50];          // Nom du canal
-    bool is_private;        // Canal privé ou public
-    int creator_id;         // ID de l'utilisateur qui a créé le canal
+    int id;                 // ID in database
+    char name[50];          // Name of channel
+    bool is_private;        // Private or public channel
+    int creator_id;         // ID of user who created the channel
 } channel_t;
 
-// Fonctions pour gérer les canaux
+// Functions to manage channels
 int add_channel(const char *name, bool is_private, int creator_id);
 bool remove_channel(int channel_id);
 bool channel_exists(int channel_id);
 bool get_channel_name(int channel_id, char *name);
 bool get_channel_by_id(int channel_id, channel_t *channel);
 
-// Gestion des permissions
+// Handle authorisations
 bool can_access_channel(int user_id, int channel_id);
 bool is_channel_admin(int user_id, int channel_id);
 bool add_user_to_channel(int user_id, int channel_id);
 bool remove_user_from_channel(int user_id, int channel_id);
 
-// Récupération des messages
+// Get messages
 void send_channel_history(int client_id, int channel_id);
 
 #endif 

@@ -6,7 +6,7 @@
 #include "user.h"
 #include "server.h"
 
-// Ajouter un nouveau canal
+// Add a new channel
 int add_channel(const char *name, bool is_private, int creator_id) {
     char query[200];
     sprintf(query, 
@@ -23,7 +23,7 @@ int add_channel(const char *name, bool is_private, int creator_id) {
     int channel_id = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
     
-    // Si c'est un canal privé, ajouter automatiquement le créateur
+    // If private channel, automatically add the creator
     if (is_private && channel_id > 0) {
         add_user_to_channel(creator_id, channel_id);
     }
@@ -31,9 +31,9 @@ int add_channel(const char *name, bool is_private, int creator_id) {
     return channel_id;
 }
 
-// Supprimer un canal
+// Delete a channel
 bool remove_channel(int channel_id) {
-    // D'abord, supprimer toutes les entrées de la table channel_users
+    // First, delete all entries from the channel_users table
     char query[200];
     sprintf(query, "DELETE FROM channel_users WHERE channel_id=%d", channel_id);
     
@@ -44,7 +44,7 @@ bool remove_channel(int channel_id) {
     }
     PQclear(result);
     
-    // Maintenant, supprimer le canal lui-même
+    // Delete the channel itself
     sprintf(query, "DELETE FROM channels WHERE id=%d", channel_id);
     
     result = execute_query(query);
@@ -57,7 +57,7 @@ bool remove_channel(int channel_id) {
     return true;
 }
 
-// Vérifier si un canal existe
+// Check if a channel exists
 bool channel_exists(int channel_id) {
     char query[100];
     sprintf(query, "SELECT id FROM channels WHERE id=%d", channel_id);
@@ -74,7 +74,7 @@ bool channel_exists(int channel_id) {
     return exists;
 }
 
-// Récupérer le nom d'un canal
+// Get the channel name
 bool get_channel_name(int channel_id, char *name) {
     char query[100];
     sprintf(query, "SELECT name FROM channels WHERE id=%d", channel_id);
@@ -96,7 +96,7 @@ bool get_channel_name(int channel_id, char *name) {
     return true;
 }
 
-// Récupérer les informations d'un canal
+// Get channel information
 bool get_channel_by_id(int channel_id, channel_t *channel) {
     char query[100];
     sprintf(query, "SELECT * FROM channels WHERE id=%d", channel_id);
@@ -112,7 +112,7 @@ bool get_channel_by_id(int channel_id, channel_t *channel) {
         return false;
     }
     
-    // Remplir la structure canal
+    // Compete channel structure
     channel->id = atoi(PQgetvalue(result, 0, 0));
     strcpy(channel->name, PQgetvalue(result, 0, 1));
     channel->is_private = strcmp(PQgetvalue(result, 0, 2), "t") == 0;
@@ -122,24 +122,24 @@ bool get_channel_by_id(int channel_id, channel_t *channel) {
     return true;
 }
 
-// Vérifier si un utilisateur peut accéder à un canal
+// Check if a user has authorisation to access a channel
 bool can_access_channel(int user_id, int channel_id) {
     channel_t channel;
     if (!get_channel_by_id(channel_id, &channel)) {
         return false;
     }
     
-    // Si c'est un canal public, tout le monde peut y accéder
+    // If a channel is public, everyone has access
     if (!channel.is_private) {
         return true;
     }
     
-    // Si c'est le créateur, il a accès
+    // If user is the creator, they have access
     if (channel.creator_id == user_id) {
         return true;
     }
     
-    // Sinon, vérifier dans la table channel_users
+    // Otherwise, check in channel_users table
     char query[200];
     sprintf(query, "SELECT user_id FROM channel_users WHERE channel_id=%d AND user_id=%d",
             channel_id, user_id);
@@ -156,14 +156,14 @@ bool can_access_channel(int user_id, int channel_id) {
     return has_access;
 }
 
-// Vérifier si un utilisateur est administrateur d'un canal
+// Check if a user is admin of a channel
 bool is_channel_admin(int user_id, int channel_id) {
-    // Si l'utilisateur est admin global, il est admin partout
+    // If a user is a global admin, they are admin everywhere
     if (is_admin(user_id)) {
         return true;
     }
     
-    // Vérifier si c'est le créateur du canal
+    // Check if they created the channel
     channel_t channel;
     if (get_channel_by_id(channel_id, &channel) && channel.creator_id == user_id) {
         return true;
@@ -176,12 +176,12 @@ bool is_channel_admin(int user_id, int channel_id) {
 bool add_user_to_channel(int user_id, int channel_id) {
     channel_t channel;
     
-    // Vérifier que le canal existe et est privé
+    // Check that channel exists and is private
     if (!get_channel_by_id(channel_id, &channel) || !channel.is_private) {
         return false;
     }
     
-    // Vérifier si l'utilisateur est déjà dans le canal
+    // Check if user is already in the channel
     char query[200];
     sprintf(query, "SELECT user_id FROM channel_users WHERE channel_id=%d AND user_id=%d",
             channel_id, user_id);
@@ -192,7 +192,7 @@ bool add_user_to_channel(int user_id, int channel_id) {
         return false;
     }
     
-    // Si l'utilisateur est déjà dans le canal, pas besoin de l'ajouter
+    // If user is already in the channel, no need to add them
     if (PQntuples(result) > 0) {
         PQclear(result);
         return true;
@@ -200,7 +200,7 @@ bool add_user_to_channel(int user_id, int channel_id) {
     
     PQclear(result);
     
-    // Ajouter l'utilisateur au canal
+    // Add user to channel
     sprintf(query, "INSERT INTO channel_users (channel_id, user_id) VALUES (%d, %d)",
             channel_id, user_id);
     
@@ -214,21 +214,21 @@ bool add_user_to_channel(int user_id, int channel_id) {
     return true;
 }
 
-// Retirer un utilisateur d'un canal privé
+// Remove a user from a private channel
 bool remove_user_from_channel(int user_id, int channel_id) {
     channel_t channel;
     
-    // Vérifier que le canal existe et est privé
+    // Check is channel exists and is private
     if (!get_channel_by_id(channel_id, &channel) || !channel.is_private) {
         return false;
     }
     
-    // Empêcher la suppression du créateur
+    // Prevent removal of channel creator
     if (channel.creator_id == user_id) {
         return false;
     }
     
-    // Supprimer l'utilisateur du canal
+    // Delete user from channel
     char query[200];
     sprintf(query, "DELETE FROM channel_users WHERE channel_id=%d AND user_id=%d",
             channel_id, user_id);
@@ -243,9 +243,9 @@ bool remove_user_from_channel(int user_id, int channel_id) {
     return true;
 }
 
-// Envoyer l'historique des messages d'un canal à un client
+// Send history of messages of a channel to a user
 void send_channel_history(int client_id, int channel_id) {
-    // Récupérer les 50 derniers messages
+    // Get the 50 last messages
     char query[300];
     sprintf(query, 
             "SELECT m.content, u.username, m.timestamp "
@@ -262,15 +262,15 @@ void send_channel_history(int client_id, int channel_id) {
         return;
     }
     
-    // Envoyer un en-tête
+    // Send a header
     char channel_name[50];
     get_channel_name(channel_id, channel_name);
     
     char header[100];
-    sprintf(header, "--- Historique du canal '%s' ---", channel_name);
+    sprintf(header, "--- Channel history '%s' ---", channel_name);
     send_to_client(client_id, header);
     
-    // Parcourir les résultats du plus ancien au plus récent
+    // Go through results from older to most recent
     int count = PQntuples(result);
     for (int i = count - 1; i >= 0; i--) {
         char message[BUFFER_SIZE];
@@ -282,7 +282,7 @@ void send_channel_history(int client_id, int channel_id) {
         send_to_client(client_id, message);
     }
     
-    send_to_client(client_id, "--- Fin de l'historique ---");
+    send_to_client(client_id, "--- End of history ---");
     
     PQclear(result);
 }

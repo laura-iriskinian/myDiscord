@@ -19,7 +19,7 @@ static bool connection_active = false;
 
 // Connection to server
 bool is_connection_active(void) {
-    return connection_active;  // Où connection_active est une variable globale dans client.c
+    return connection_active;  
 }
 bool init_connection(void) {
     struct sockaddr_in server_addr;
@@ -57,7 +57,7 @@ void close_connection(void) {
 // Send a message to server
 bool send_to_server(const char* message) {
     if (server_socket < 0 || !connection_active) {
-        fprintf(stderr, "Impossible d'envoyer un message: pas de connexion active au serveur.\n");
+        fprintf(stderr, "Impossible to send a message: no active connection to server.\n");
         return false;
     }
     
@@ -83,7 +83,7 @@ bool receive_from_server(char* buffer, int size) {
 // Function called in interface.c
 void send_message_to_server(const char *message) {
     if (!send_to_server(message)) {
-        fprintf(stderr, "Erreur lors de l'envoi du message au serveur.\n");
+        fprintf(stderr, "Error when sending message to server.\n");
     }
 }
 
@@ -102,7 +102,7 @@ void* receive_thread(void* arg) {
         // Process authentication responses
         if (strstr(buffer, "Authentication") != NULL || 
             strstr(buffer, "successfull") != NULL ||
-            strstr(buffer, "Authentification") != NULL ||
+            strstr(buffer, "Authentication") != NULL ||
             strstr(buffer, "Error:") != NULL || 
             strstr(buffer, "Incorrect") != NULL) {
             handle_auth_response(buffer);

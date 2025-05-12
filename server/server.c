@@ -444,7 +444,7 @@ void parse_command(int client_id, char *buffer) {
             char email[50], password[50];
             if (sscanf(args, "%s %s", email, password) == 2) {
                 if (authenticate_user(client_id, email, password)) {
-                    send_to_client(client_id, "Authentification successfull");
+                    send_to_client(client_id, "Authentication successfull");
                 } else {
                     send_to_client(client_id, "Error: Incorrect email or password");
                 }
