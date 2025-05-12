@@ -291,26 +291,25 @@ static GtkWidget* build_register_screen(void) {
 }
 
 static GtkWidget* build_chat_screen(void) {
-    // Création du layout principal horizontal
+    // Creation main horizontal layout
     GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     
-    // 1. Panneau des serveurs (à gauche)
+    // 1. Server panel (to the left)
     GtkWidget *servers_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_size_request(servers_panel, 70, -1);
     gtk_widget_add_css_class(servers_panel, "servers");
     
-    // Pour l'instant, nous n'avons qu'un seul serveur
+    // For now we only have one server
     GtkWidget *server_btn = gtk_button_new_with_label("MD");
     gtk_widget_add_css_class(server_btn, "server-button");
     gtk_box_append(GTK_BOX(servers_panel), server_btn);
     
-    // 2. Panneau des canaux (à côté du panneau des serveurs)
+    // 2. Channel panel(next to server panel)
     GtkWidget *channels_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_size_request(channels_panel, 200, -1);
     gtk_widget_add_css_class(channels_panel, "conversations");
     
-    // Récupérer les canaux depuis le backend (à implémenter)
-    // Pour l'instant, ajouter quelques canaux de test
+    // Show a few test channels
     const char *channel_names[] = {"General", "Notice board", "Community help", "General-private", "Discussions"};
     int channel_ids[] = {1, 2, 3, 4, 5};
     
@@ -318,7 +317,7 @@ static GtkWidget* build_chat_screen(void) {
         GtkWidget *channel_btn = gtk_button_new_with_label(channel_names[i]);
         gtk_widget_add_css_class(channel_btn, "conversation-button");
         
-        // Allouer et stocker l'ID du canal pour pouvoir l'utiliser dans le callback
+        // Alloocate and stock channel ID to use in callback
         int *id_ptr = g_new(int, 1);
         *id_ptr = channel_ids[i];
         g_signal_connect(channel_btn, "clicked", G_CALLBACK(on_channel_clicked), id_ptr);
@@ -326,13 +325,13 @@ static GtkWidget* build_chat_screen(void) {
         gtk_box_append(GTK_BOX(channels_panel), channel_btn);
     }
     
-    // 3. Panneau de chat (au centre)
+    // 3. Chat panel 
     GtkWidget *chat_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_add_css_class(chat_panel, "chat");
     gtk_widget_set_hexpand(chat_panel, TRUE);
     gtk_widget_set_vexpand(chat_panel, TRUE);
     
-    // Zone de messages (scrollable)
+    // Message area (scrollable)
     GtkWidget *scroll_window = gtk_scrolled_window_new();
     gtk_widget_set_vexpand(scroll_window, TRUE);
     
@@ -345,7 +344,7 @@ static GtkWidget* build_chat_screen(void) {
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll_window), app_data.main_chat_area);
     gtk_box_append(GTK_BOX(chat_panel), scroll_window);
     
-    // Zone de saisie de message
+    // Text entry area
     GtkWidget *input_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     
     GtkWidget *msg_scroll = gtk_scrolled_window_new();
@@ -356,7 +355,7 @@ static GtkWidget* build_chat_screen(void) {
     gtk_widget_add_css_class(app_data.chat_text_view, "chat-entry");
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(msg_scroll), app_data.chat_text_view);
     
-    GtkWidget *send_button = gtk_button_new_with_label("Envoyer");
+    GtkWidget *send_button = gtk_button_new_with_label("Send");
     gtk_widget_add_css_class(send_button, "my-button");
     g_signal_connect(send_button, "clicked", G_CALLBACK(on_send_message_clicked), NULL);
     
